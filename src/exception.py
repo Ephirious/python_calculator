@@ -14,21 +14,22 @@ class ExpressionError(Exception):
         self.message = message
 
     def __str__(self):
-        result = self._from_token_to_str() + "\n"
-        
-        if self.invalid_position != ExpressionError.UNKNOWN_POSITION:
-            result += (self.invalid_position * " ")
-            result += "^\n"
-        result += self.message
-        
-        return result
-    
-    def _from_token_to_str(self) -> str:
-        result = ""
-        for token in self.tokens:
-            result += token.get_token()
-        return result
+        tokens_str = ""
 
+        temp_invalid_position = 0
+        for index in range(len(self.tokens)):
+            if (index == self.invalid_position):
+                temp_invalid_position = len(tokens_str)
+            tokens_str += self.tokens[index].get_token()
+        self.invalid_position = temp_invalid_position
+
+        tokens_str += "\n"
+        if self.invalid_position != ExpressionError.UNKNOWN_POSITION:
+            tokens_str += (self.invalid_position * " ")
+            tokens_str += "^\n"
+        tokens_str += self.message
+        
+        return tokens_str
 
 class BracketsBalanceError(ExpressionError):
     ERROR_MESSAGE = "Invalid brackets balance"
@@ -51,10 +52,10 @@ class InvalidBinaryOperatorError(ExpressionError):
         super().__init__(tokens, invalid_position, InvalidBinaryOperatorError.ERROR_MESSAGE)
 
 class TwiceNumberError(ExpressionError):
-    ERROR_MESSAGE = "Еwo numbers in a row are not supported"
+    ERROR_MESSAGE = "Two numbers in a row are not supported"
 
     def __init__(self, tokens, invalid_position):
-        super().__init__(tokens, invalid_position, InvalidBinaryOperatorError.ERROR_MESSAGE)
+        super().__init__(tokens, invalid_position, TwiceNumberError.ERROR_MESSAGE)
 
 
 if (__name__ == "__main__"):
