@@ -1,4 +1,4 @@
-class Token():
+class Token:
     value: str
 
     def __init__(self, token: str):
@@ -6,13 +6,13 @@ class Token():
 
     def get_token(self) -> str:
         return self.value
-    
+
     def __repr__(self):
         return f"{type(self).__name__}({self.value})"
-    
+
     def __str__(self):
         return self.value
-    
+
 
 class Operator(Token):
     PLUS = "+"
@@ -30,5 +30,16 @@ class Operator(Token):
 
 
 class Number(Token):
-    def __init__(self, token: str):
+    NUMBER_DOT = "."
+
+    __is_integer: bool
+
+    def __init__(self, token: str, is_integer: bool):
         super().__init__(token)
+        self.__is_integer = is_integer
+
+    def is_integer(self) -> bool:
+        return self.__is_integer
+
+    def is_float(self) -> bool:
+        return not self.__is_integer
