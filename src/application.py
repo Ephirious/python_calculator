@@ -3,6 +3,7 @@ from src.validator import Validator
 from src.calculator import Calculator
 from src.exception import ExpressionError
 
+
 class Application:
     validator: Validator
     tokenizer: Tokenizer
@@ -18,19 +19,21 @@ class Application:
 
     def _start_main_loop(self):
         PROGRAMM_QUESTION = "Please write your expression: "
-        user_input = input(PROGRAMM_QUESTION)
 
-        while (user_input != "q"):
+        while (user_input := input(PROGRAMM_QUESTION)) != "q":
+            result = None
+
             try:
                 self.validator.check_correctness_expression(user_input)
+                tokens = self.tokenizer.tokenize(user_input)
+                result = self.calculator.calculate(tokens)
             except ExpressionError as exception:
                 print(exception)
-                user_input = input(PROGRAMM_QUESTION) 
-                continue
+            except ZeroDivisionError as exception:
+                print("Запрещено делить на ноль.")
+                print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
+            except ArithmeticError as exception:
+                print("Операнд слева должен быть целым для операция % и //.")
+                print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
 
-            tokens = self.tokenizer.analyze(user_input)
-            result = self.calculator.calculate(tokens)
-
-            print(f"{user_input} = {result}")           
-
-            user_input = input(PROGRAMM_QUESTION) 
+            print(f"{user_input} = {result}")
