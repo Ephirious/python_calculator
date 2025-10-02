@@ -1,11 +1,11 @@
 from src.tokens import Token, Number, Operator
 from src.exception import DigitsOverFlow
-from sys import get_int_max_str_digits
+import sys
 import math
 
 
 class Calculator:
-    MAX_INTEGER_COUNT_DIGITS = get_int_max_str_digits()
+    MAX_INTEGER_COUNT_DIGITS = sys.get_int_max_str_digits()
 
     tokens: list[Token]
     tokens_length: int
@@ -156,10 +156,11 @@ class Calculator:
 
     def _get_integer_digits_count(self, number: int) -> int:
         count = 0
+        number = abs(number)
 
         while number != 0:
             count += 1
-            number = int(number / 10)
+            number //= 10
 
         return count
 
@@ -220,22 +221,22 @@ class Calculator:
     ) -> None:
         result = None
 
-        match operator.get_token():
-            case Operator.PLUS:
-                result = num1 + num2
+        try:
+            match operator.get_token():
+                case Operator.PLUS:
+                    result = num1 + num2
 
-            case Operator.MINUS:
-                result = num1 - num2
+                case Operator.MINUS:
+                    result = num1 - num2
 
-            case Operator.MULTIPLICATION:
-                result = num1 * num2
+                case Operator.MULTIPLICATION:
+                    result = num1 * num2
 
-            case Operator.DIVISION:
-                self._check_zero_division(num2)
-                result = num1 / num2
+                case Operator.DIVISION:
+                    self._check_zero_division(num2)
+                    result = num1 / num2
 
-            case Operator.POWER:
-                result = num1**num2
-
-        if result is not None and math.isinf(result):
+                case Operator.POWER:
+                    result = num1**num2
+        except OverflowError:
             raise DigitsOverFlow(self.log)

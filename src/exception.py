@@ -22,7 +22,7 @@ class TokenErrors(ExpressionError):
     def __str__(self):
         tokens_str = ""
 
-        temp_invalid_position = 0
+        temp_invalid_position = TokenErrors.UNKNOWN_POSITION
         for index in range(len(self.tokens)):
             if index == self.invalid_position:
                 temp_invalid_position = len(tokens_str)
@@ -31,6 +31,7 @@ class TokenErrors(ExpressionError):
 
         tokens_str += "\n"
         if self.invalid_position != TokenErrors.UNKNOWN_POSITION:
+            print(self.invalid_position)
             tokens_str += self.invalid_position * " "
             tokens_str += "^\n"
         tokens_str += self.message
