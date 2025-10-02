@@ -1,7 +1,8 @@
 from src.tokenizer import Tokenizer
 from src.validator import Validator
 from src.calculator import Calculator
-from src.exception import ExpressionError
+from src.exception import ExpressionError, DigitsOverFlow
+from src.tokens import Token
 
 
 class Application:
@@ -32,8 +33,15 @@ class Application:
             except ZeroDivisionError as exception:
                 print("Запрещено делить на ноль.")
                 print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
-            except ArithmeticError as exception:
+            except TypeError as exception:
                 print("Операнд слева должен быть целым для операция % и //.")
                 print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
+            except DigitsOverFlow as exception:
+                print(f"Слишком большие размеры операндов -> {exception.log}")
+            else:
+                self._output_result(tokens, result)
 
-            print(f"{user_input} = {result}")
+    def _output_result(self, tokens: list[Token], result: int | float) -> None:
+        for token in tokens:
+            print(token.get_token(), end=" ")
+        print(f"= {result}")

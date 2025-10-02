@@ -1,3 +1,6 @@
+from src.tokens import Token
+
+
 class ExpressionError(Exception):
     invalid_position: int
     message: str
@@ -8,6 +11,8 @@ class ExpressionError(Exception):
 
 
 class TokenErrors(ExpressionError):
+    tokens: list[Token]
+
     UNKNOWN_POSITION = -1
 
     def __init__(self, tokens, invalid_position, message):
@@ -21,7 +26,7 @@ class TokenErrors(ExpressionError):
         for index in range(len(self.tokens)):
             if index == self.invalid_position:
                 temp_invalid_position = len(tokens_str)
-            tokens_str += self.tokens[index].get_token()
+            tokens_str += self.tokens[index].get_token() + " "
         self.invalid_position = temp_invalid_position
 
         tokens_str += "\n"
@@ -92,3 +97,8 @@ class NumberDotError(ExpressionStringError):
 
     def __init__(self, expression, invalid_position):
         super().__init__(expression, invalid_position, NumberDotError.ERROR_MESSAGE)
+
+
+class DigitsOverFlow(Exception):
+    def __init__(self, log):
+        self.log = log
