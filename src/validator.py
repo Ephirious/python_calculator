@@ -94,7 +94,7 @@ class Validator:
 
         if is_first_token_not_number:
             self._check_if_first_token_not_number(tokens, TOKENS_SIZE)
-        elif is_last_token_operator:
+        if is_last_token_operator:
             raise InvalidBinaryOperatorError(tokens, LAST_INDEX)
         else:
             self._check_correctness_operators_inside(tokens, TOKENS_SIZE)
@@ -173,3 +173,9 @@ class Validator:
 
     def _is_operator(self, token: Token) -> bool:
         return isinstance(token, Operator)
+
+
+if __name__ == "__main__":
+    tokenizer = Tokenizer()
+    validator = Validator(tokenizer)
+    validator.check_correctness_expression("-6 * -6")

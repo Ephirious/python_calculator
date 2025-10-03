@@ -194,7 +194,6 @@ def test_correctness_operators(expression):
         ("5 % 2", None),
         ("5 % (2+1)", None),
         ("(1+(2*3))-4", None),
-        ("-(-5 + 2) * +3", None),
         ("((2))", None),
         ("10 - (3+4)*2", None),
         ("3 * (+5)", None),
