@@ -1,3 +1,9 @@
+"""
+Модуль валидации
+Содержит класс Validator, ответственный за многоуровневую
+входной строки выражения
+"""
+
 from src.tokenizer import Tokenizer
 from src.tokens import Token, Operator, Number
 from src.exception import (
@@ -11,14 +17,39 @@ from src.exception import (
 
 
 class Validator:
+    """
+    Класс, выполняющий валидацию входного выражения
+    """
+
     tokenizer: Tokenizer
     alphabet: set
 
     def __init__(self, tokenizer: Tokenizer) -> None:
+        """
+        Внедрение токенайзера как зависимости.
+        Установка рабочего алфавита программы
+        """
         self.tokenizer = tokenizer
         self.alphabet = set(".0123456789()+-/*% ")
 
     def check_correctness_expression(self, expression: str) -> None:
+        """
+        Выполняет многоуровневую проверку валидности выражения
+
+        Аргумент:
+            expression (str): выражение
+
+        Возвращает:
+            None
+
+        Исключения:
+            BracketsBalanceError: если нарушен баланс скобок в выражении
+            UnknownSymbolError: если найден неизвестный символ
+            NumberDotError: если нарушены правила расставление точки числа с плавающей точкой
+            EmptyBracketsError: если есть в выражении пустые скобки '()'
+            InvalidBinaryOperatorError: если нарушены правила расстановки операторов
+            TwiceNumberError: если есть два числа, между которыми нет оператора
+        """
         self._check_correctness_by_alphabet(expression)
         self._check_correctness_number_dot(expression)
 
@@ -30,6 +61,18 @@ class Validator:
         self._check_absence_double_twice_numbers(tokens)
 
     def _check_correctness_brackets_balance(self, tokens: list[Token]) -> None:
+        """
+        Выполняет проверку баланса скобок в выражении
+
+        Аргументы:
+            tokens (list[Token]): токены выражения
+
+        Возвращает:
+            None
+
+        Исключения:
+            BracketsBalanceError: если нарушен баланс скобок в выражении
+        """
         brackets = list()
 
         for token in tokens:
@@ -45,6 +88,18 @@ class Validator:
             raise BracketsBalanceError(tokens)
 
     def _check_correctness_by_alphabet(self, expression: str) -> None:
+        """
+        Выполняет проверку корректности выражения относительно алфавита
+
+        Аргументы:
+            expression (str): выражение
+
+        Возвращает:
+            None
+
+        Исключения:
+            UnknownSymbolError: если найден неизвестный символ
+        """
         expression_length = len(expression)
 
         for index in range(expression_length):
@@ -52,6 +107,18 @@ class Validator:
                 raise UnknownSymbolError(expression, index)
 
     def _check_correctness_number_dot(self, expression: str) -> None:
+        """
+        Выполняет проверку корректности выражения расстановки плавающей точки
+
+        Аргументы:
+            expression (str): выражение
+
+        Возвращает:
+            None
+
+        Исключения:
+            NumberDotError: если нарушены правила расставление точки числа с плавающей точкой
+        """
         expression_length = len(expression)
 
         if expression[expression_length - 1] == Number.NUMBER_DOT:
@@ -70,6 +137,18 @@ class Validator:
                     raise NumberDotError(expression, index - 1)
 
     def _check_absence_empty_brackets(self, tokens: list[Token]) -> None:
+        """
+        Выполняет проверку на отсутствие пустых скобок в выражении
+
+        Аргументы:
+            tokens (list[Token]): токены выражения
+
+        Возвращает:
+            None
+
+        Исключения:
+            EmptyBracketsError: если есть в выражении пустые скобки '()'
+        """
         tokens_size = len(tokens)
 
         for index in range(tokens_size):
@@ -82,42 +161,53 @@ class Validator:
                     raise EmptyBracketsError(tokens, index)
 
     def _check_correctness_binary_operators(self, tokens: list[Token]) -> None:
+        """
+        Выполняет проверку отсутствия ввода двух операторов подряд
+
+        Аргументы:
+            tokens (list[Token]): токены выражения
+
+        Возвращает:
+            None
+
+        Исключения:
+            InvalidBinaryOperatorError: если нарушены правила расстановки операторов
+        """
         TOKENS_SIZE = len(tokens)
-        START_INDEX = 0
         LAST_INDEX = TOKENS_SIZE - 1
 
-        is_first_token_not_number = not self._is_number(tokens[START_INDEX])
         is_last_token_operator = (
             self._is_operator(tokens[LAST_INDEX])
             and tokens[LAST_INDEX].get_token() != Operator.RIGHT_BRACKET
         )
 
-        if is_first_token_not_number:
-            self._check_if_first_token_not_number(tokens, TOKENS_SIZE)
         if is_last_token_operator:
             raise InvalidBinaryOperatorError(tokens, LAST_INDEX)
         else:
             self._check_correctness_operators_inside(tokens, TOKENS_SIZE)
 
-    def _check_if_first_token_not_number(
-        self, tokens: list[Token], tokens_size: int
-    ) -> None:
-        LAST_INDEX = tokens_size - 1
-        for index in range(tokens_size):
-            token = tokens[index]
-
-            is_start_token_is_binary = self._is_binary_operator(token)
-            is_token_number = self._is_number(token)
-            is_index_equal_last = (index == LAST_INDEX) and (not is_token_number)
-
-            if is_start_token_is_binary or is_index_equal_last:
-                raise InvalidBinaryOperatorError(tokens, index)
-            elif is_token_number:
-                break
-
     def _check_correctness_operators_inside(
         self, tokens: list[Token], tokens_size: int
     ) -> None:
+        """
+        Вспомогательная функция для функции _check_correctness_binary_operators,
+        которая сама уже производит проверку корректности операторов
+
+        Аргументы:
+            tokens (list[Token]): токены выражения
+
+        Возвращает:
+            None
+
+        Исключения:
+            InvalidBinaryOperatorError: если нарушены правила расстановки операторов
+        """
+        if (
+            not self._is_bracket(tokens[0])
+            and (tokens[0].get_token() not in (Operator.PLUS, Operator.MINUS))
+            and not self._is_number(tokens[0])
+        ):
+            raise InvalidBinaryOperatorError(tokens, 0)
         for index in range(tokens_size):
             if self._is_operator(tokens[index]) and (
                 not self._is_bracket(tokens[index])
@@ -132,6 +222,18 @@ class Validator:
                     raise InvalidBinaryOperatorError(tokens, cursor)
 
     def _check_absence_double_twice_numbers(self, tokens: list[Token]) -> None:
+        """
+        Выполняет проверку на отсутствие двух идущих подряд чисел
+
+        Аргументы:
+            tokens (list[Token]): токены выражения
+
+        Возвращает:
+            None
+
+        Исключения:
+            TwiceNumberError: если есть два числа, между которыми нет оператора
+        """
         tokens_size = len(tokens)
 
         for index in range(tokens_size):
@@ -145,12 +247,30 @@ class Validator:
                     raise TwiceNumberError(tokens, next_index)
 
     def _is_unary_operator(self, token: Token) -> bool:
+        """
+        Проверяет, является ли токен унарным оператором
+
+        Аргументы:
+            token (Token): токен
+
+        Возвращает:
+            bool
+        """
         if isinstance(token, Operator):
             if token.get_token() in (Operator.PLUS, Operator.MINUS):
                 return True
         return False
 
     def _is_binary_operator(self, token: Token) -> bool:
+        """
+        Проверяет, является ли токен бинарным оператором
+
+        Аргументы:
+            token (Token): токен
+
+        Возвращает:
+            bool
+        """
         if isinstance(token, Operator):
             if token.get_token() in (
                 Operator.MULTIPLICATION,
@@ -163,19 +283,40 @@ class Validator:
         return False
 
     def _is_bracket(self, token: Token) -> bool:
+        """
+        Проверяет, является ли токен скобками
+
+        Аргументы:
+            token (Token): токен
+
+        Возвращает:
+            bool
+        """
         if isinstance(token, Operator):
             if token.get_token() in (Operator.LEFT_BRACKET, Operator.RIGHT_BRACKET):
                 return True
         return False
 
     def _is_number(self, token: Token) -> bool:
+        """
+        Проверяет, является ли токен числом
+
+        Аргументы:
+            token (Token): токен
+
+        Возвращает:
+            bool
+        """
         return isinstance(token, Number)
 
     def _is_operator(self, token: Token) -> bool:
+        """
+        Проверяет, является ли токен оператором в целом
+
+        Аргументы:
+            token (Token): токен
+
+        Возвращает:
+            bool
+        """
         return isinstance(token, Operator)
-
-
-if __name__ == "__main__":
-    tokenizer = Tokenizer()
-    validator = Validator(tokenizer)
-    validator.check_correctness_expression("-6 * -6")
