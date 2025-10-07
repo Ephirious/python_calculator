@@ -31,7 +31,6 @@ class TokenErrors(ExpressionError):
 
         tokens_str += "\n"
         if self.invalid_position != TokenErrors.UNKNOWN_POSITION:
-            print(self.invalid_position)
             tokens_str += self.invalid_position * " "
             tokens_str += "^\n"
         tokens_str += self.message
@@ -40,7 +39,7 @@ class TokenErrors(ExpressionError):
 
 
 class BracketsBalanceError(TokenErrors):
-    ERROR_MESSAGE = "Invalid brackets balance"
+    ERROR_MESSAGE = "ОШИБКА: Нарушен баланс скобок"
 
     def __init__(self, tokens):
         super().__init__(
@@ -49,14 +48,16 @@ class BracketsBalanceError(TokenErrors):
 
 
 class EmptyBracketsError(TokenErrors):
-    ERROR_MESSAGE = "Incorrect empty brackets"
+    ERROR_MESSAGE = "ОШИБКА: В выражении присутствуют пустые скобки"
 
     def __init__(self, tokens, invalid_position):
         super().__init__(tokens, invalid_position, EmptyBracketsError.ERROR_MESSAGE)
 
 
 class InvalidBinaryOperatorError(TokenErrors):
-    ERROR_MESSAGE = "Invalid usage of binary operator"
+    ERROR_MESSAGE = (
+        "ОШИБКА: В выражении не должно идти двух подряд идущих бинарных операторов"
+    )
 
     def __init__(self, tokens, invalid_position):
         super().__init__(
@@ -65,7 +66,9 @@ class InvalidBinaryOperatorError(TokenErrors):
 
 
 class TwiceNumberError(TokenErrors):
-    ERROR_MESSAGE = "Two numbers in a row are not supported"
+    ERROR_MESSAGE = (
+        "ОШИБКА: В выражении не должно идти двух подряд идущих чисел без оператора"
+    )
 
     def __init__(self, tokens, invalid_position):
         super().__init__(tokens, invalid_position, TwiceNumberError.ERROR_MESSAGE)
@@ -87,14 +90,14 @@ class ExpressionStringError(ExpressionError):
 
 
 class UnknownSymbolError(ExpressionStringError):
-    ERROR_MESSAGE = "В выражении содержиться неизвестный символ"
+    ERROR_MESSAGE = "ОШИБКА: В выражении содержиться неизвестный символ"
 
     def __init__(self, expression, invalid_position):
         super().__init__(expression, invalid_position, UnknownSymbolError.ERROR_MESSAGE)
 
 
 class NumberDotError(ExpressionStringError):
-    ERROR_MESSAGE = "В выражении содержиться ошибка, связанная с плавающей точкой вещественного числа"
+    ERROR_MESSAGE = "ОШИБКА: В выражении содержиться ошибка, связанная с плавающей точкой вещественного числа"
 
     def __init__(self, expression, invalid_position):
         super().__init__(expression, invalid_position, NumberDotError.ERROR_MESSAGE)
