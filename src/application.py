@@ -62,13 +62,15 @@ class Application:
             except ExpressionError as exception:
                 print(exception)
             except ZeroDivisionError as exception:
-                print("Запрещено делить на ноль")
+                print("ОШИБКА: Запрещено делить на ноль")
                 print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
             except TypeError as exception:
-                print("Операнд слева и справа должны быть целыми для операция % и //")
+                print(
+                    "ОШИБКА: Операнд слева и справа должны быть целыми для операция % и //"
+                )
                 print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
             except DigitsOverFlow as exception:
-                print(f"Слишком большие размеры операндов -> {exception.log}")
+                print(f"ОШИБКА: Слишком большие размеры операндов -> {exception.log}")
             else:
                 self._output_result(tokens, result)
 
