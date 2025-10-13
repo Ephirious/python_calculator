@@ -104,7 +104,14 @@ class Application:
             expression += token.get_token() + " "
         print(f"{expression}= {result}")
 
-    def _init_logger(self):
+    def _init_logger(self) -> None:
+        """
+        Функция, инициализирующая логгер
+
+        Возвращаемое значение:
+            None
+        """
+
         LOG_FORMAT = "[%(asctime)s.%(msecs)03d][%(name)s][%(levelname)s]\n%(message)s"
         LOG_LEVEL = logging.ERROR
         LOG_FILENAME = "log.txt"
