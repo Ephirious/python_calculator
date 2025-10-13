@@ -8,6 +8,8 @@ from src.calculator import Calculator
 from src.exception import ExpressionError, DigitsOverFlow
 from src.tokens import Token
 
+import logging
+
 
 class Application:
     """
@@ -22,6 +24,7 @@ class Application:
     validator: Validator
     tokenizer: Tokenizer
     calculator: Calculator
+    logger: logging.Logger
 
     def __init__(
         self, validator: Validator, tokenizer: Tokenizer, calculator: Calculator
@@ -32,6 +35,7 @@ class Application:
         self.validator = validator
         self.tokenizer = tokenizer
         self.calculator = calculator
+        self.logger = None
 
     def execute(self) -> None:
         """
@@ -40,6 +44,7 @@ class Application:
         Вовзращаемое значение:
             None
         """
+        self._init_logger()
         self._start_main_loop()
 
     def _start_main_loop(self) -> None:
@@ -60,17 +65,23 @@ class Application:
                 tokens = self.tokenizer.tokenize(user_input)
                 result = self.calculator.calculate(tokens)
             except ExpressionError as exception:
-                print(exception)
+                self.logger.error(exception.__str__())
             except ZeroDivisionError as exception:
-                print("ОШИБКА: Запрещено делить на ноль")
-                print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
-            except TypeError as exception:
-                print(
-                    "ОШИБКА: Операнд слева и справа должны быть целыми для операция % и //"
+                self.logger.error(
+                    "ОШИБКА: Запрещено делить на ноль"
+                    + "\n"
+                    + f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'"
                 )
-                print(f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'")
+            except TypeError as exception:
+                self.logger.error(
+                    "ОШИБКА: Операнд слева и справа должны быть целыми для операция % и //"
+                    + "\n"
+                    + f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'"
+                )
             except DigitsOverFlow as exception:
-                print(f"ОШИБКА: Слишком большие размеры операндов -> {exception.log}")
+                self.logger(
+                    f"ОШИБКА: Слишком большие размеры операндов -> {exception.log}"
+                )
             else:
                 self._output_result(tokens, result)
 
@@ -85,6 +96,17 @@ class Application:
         Возвращаемое значение:
             None
         """
+        expression = ""
         for token in tokens:
-            print(token.get_token(), end=" ")
-        print(f"= {result}")
+            expression += token.get_token() + " "
+        print(f"{expression}= {result}")
+
+    def _init_logger(self):
+        LOG_FORMAT = "[%(asctime)s.%(msecs)03d][%(name)s][%(levelname)s]\n%(message)s"
+        LOG_LEVEL = logging.ERROR
+        LOG_FILENAME = "log.txt"
+        HANLDERS = [logging.FileHandler(LOG_FILENAME), logging.StreamHandler()]
+
+        logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL, handlers=HANLDERS)
+
+        self.logger = logging.getLogger(__name__)
