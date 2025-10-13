@@ -60,6 +60,9 @@ class Application:
         while (user_input := input(PROGRAMM_QUESTION)) != STOP_SYMBOL:
             result = None
 
+            if user_input.replace(" ", "") == "":
+                continue
+
             try:
                 self.validator.check_correctness_expression(user_input)
                 tokens = self.tokenizer.tokenize(user_input)
@@ -79,7 +82,7 @@ class Application:
                     + f"Эта часть выражения вызывает ошибку -> '{exception.args[0]}'"
                 )
             except DigitsOverFlow as exception:
-                self.logger(
+                self.logger.error(
                     f"ОШИБКА: Слишком большие размеры операндов -> {exception.log}"
                 )
             else:
